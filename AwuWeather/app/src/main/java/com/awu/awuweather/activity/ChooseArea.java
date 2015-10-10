@@ -1,8 +1,14 @@
 package com.awu.awuweather.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,6 +34,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChooseArea extends Activity {
+    private static  final  String TAG = "ChooseArea";
+
     public static final int LEVEL_PROVINCE = 0;
     public static final  int LEVEL_CITY = 1;
     public static final int LEVEL_COUNTY = 2;
@@ -50,6 +58,13 @@ public class ChooseArea extends Activity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_choose_area);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        if(sp.getBoolean("city_selected",false)){
+            Intent intent = new Intent(this,WeatherActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
 
         listView = (ListView)findViewById(R.id.list_view);
         titlText = (TextView)findViewById(R.id.title_text);
@@ -65,6 +80,12 @@ public class ChooseArea extends Activity {
                 }else if(currentLevel == LEVEL_CITY){
                     selectedCity = cityList.get(position);
                     queryCounties();;
+                }else if(currentLevel == LEVEL_COUNTY){
+                    String countyCode = countyList.get(position).getCountyCode();
+                    Intent intent = new Intent(ChooseArea.this,WeatherActivity.class);
+                    intent.putExtra("county_code",countyCode);
+                    startActivity(intent);
+                    finish();
                 }
             }
         });
@@ -113,6 +134,7 @@ public class ChooseArea extends Activity {
             adapter.notifyDataSetChanged();
             listView.setSelection(0);
             titlText.setText(selectedCity.getCityName());
+            currentLevel = LEVEL_COUNTY;
         }else{
             queryFromServer(selectedCity.getCityCode(),"county");
         }
@@ -134,7 +156,7 @@ public class ChooseArea extends Activity {
                     result = Utility.handleProvinceResponse(db,response);
                 }else if("city".equals(type)){
                     result = Utility.handleCitiesResponse(db,response,selectedProvince.getId());
-                }else if("county".equals("type")){
+                }else if("county".equals(type)){
                     result = Utility.handleCountiesResponse(db,response,selectedCity.getId());
                 }
 
@@ -163,7 +185,23 @@ public class ChooseArea extends Activity {
                     public void run() {
                         closeProgressDialog();
                         Toast.makeText(ChooseArea.this,"加载失败",Toast.LENGTH_SHORT).show();
-
+                        if(currentLevel == LEVEL_PROVINCE){
+                            AlertDialog.Builder builder = new AlertDialog.Builder(ChooseArea.this)
+                                    .setTitle("加载失败，点击重试")
+                                    .setPositiveButton("重试", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            queryProvinces();
+                                        }
+                                    })
+                                    .setNegativeButton("退出应用", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            finish();
+                                        }
+                                    });
+                            builder.show();
+                        }
                     }
                 });
             }

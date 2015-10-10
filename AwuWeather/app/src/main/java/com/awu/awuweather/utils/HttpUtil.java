@@ -5,12 +5,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import android.util.*;
 
 /**
  * Created by awu on 2015-09-29.
  */
 public class HttpUtil {
-
+    private final  static String TAG = "HttpUtil";
     public static void sendHttpRequest(final String address,final HttpCallbackListener listener){
         new Thread(new Runnable() {
             @Override
@@ -18,6 +19,7 @@ public class HttpUtil {
                 HttpURLConnection connection = null;
                 try{
                     URL url = new URL(address);
+                    Log.i(TAG, "run " + address);
                     connection = (HttpURLConnection)url.openConnection();
                     connection.setRequestMethod("GET");
                     connection.setConnectTimeout(8000);
@@ -31,6 +33,7 @@ public class HttpUtil {
                     }
 
                     if(listener != null){
+                        Log.i(TAG, "run getdata:" + response);
                         listener.onFinish(response.toString());
                     }
                 }catch (Exception e){

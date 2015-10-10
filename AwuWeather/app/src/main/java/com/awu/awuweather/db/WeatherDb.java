@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.*;
 
 import com.awu.awuweather.model.City;
 import com.awu.awuweather.model.County;
@@ -17,6 +18,7 @@ import java.util.List;
  * Created by awu on 2015-09-29.
  */
 public class WeatherDb {
+    private static  final  String TAG = "WeatherDb";
     //database name.
     public static final  String DB_NAME = "awu_weather";
     //database version.
@@ -151,7 +153,8 @@ public class WeatherDb {
             ContentValues values = new ContentValues();
             values.put("county_name",county.getCountyName());
             values.put("county_code",county.getCountyCode());
-            values.put("city_code",county.getCityId());
+            values.put("city_id",county.getCityId());
+            Log.i(TAG, "saveCounty "+county.getCityId());
             db.insert("County", null, values);
         }
     }
@@ -167,7 +170,6 @@ public class WeatherDb {
         List<County> list = new ArrayList<County>();
         Cursor cursor = db.query("County",null,"city_id = ?",
                 new String[]{String.valueOf(cityCode)},null,null,null);
-
         if(cursor.moveToFirst()){
             do{
                 County county = new County();
@@ -175,13 +177,13 @@ public class WeatherDb {
                 county.setCountyName(cursor.getString(cursor.getColumnIndex("county_name")));
                 county.setCountyCode(cursor.getString(cursor.getColumnIndex("county_code")));
                 county.setCityId(cursor.getInt(cursor.getColumnIndex("city_id")));
+                list.add(county);
             }while (cursor.moveToNext());
         }
 
         if(cursor != null){
             cursor.close();
         }
-
         return list;
     }
 

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AwuWeather</string>
+    <string name="app_name">啊呜天气</string>
     <string name="title_activity_choose_area">ChooseArea</string>
 
     <string name="hello_world">Hello world!</string>
