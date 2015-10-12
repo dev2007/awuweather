@@ -65,6 +65,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
         switchCity = (Button)findViewById(R.id.switch_city);
         refreshWeather = (Button)findViewById(R.id.refresh_weather);
         switchCity.setOnClickListener(this);
+        refreshWeather.setOnClickListener(this);
     }
 
     private void queryWeatherCode(String countyCode){
@@ -103,7 +104,12 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
 
             @Override
             public void onError(Exception e) {
-//                publishText.setText("同步失败");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        publishText.setText("同步失败");
+                    }
+                });
             }
         });
     }
